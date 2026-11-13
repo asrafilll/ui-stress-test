@@ -1,21 +1,39 @@
-# ui-stress-test
+# Asrafil's agent skills
 
-An agent skill for Claude Code and Codex that stress-tests a UI and reports what to **Fix** and what to **Improve**, including flow changes.
+Agent skills for [Claude Code](https://claude.com/claude-code), Codex and other agents that read `SKILL.md` folders. Most of them are about UI and design work.
 
-It works on one idea: a screen exists so that a specific person can finish a specific job in their real situation. So it audits top-down:
+There are two folders:
 
-| Layer | Question |
+- [`personal/`](personal/): skills I wrote.
+- [`preferences/`](preferences/): skills by other people that I use every day. They are copied here with credit and their licenses. See [Credits](#credits).
+
+The repo started as the home of `ui-stress-test`, so it keeps that name.
+
+## Personal
+
+| Skill | What it does |
 |---|---|
-| L1 Job and situation | Who, when, where, on what device, how much is at stake? |
-| L2 Flow | How far is the real path from the shortest path to finish the job? |
-| L3 System truth | What do the code, data model and permissions allow? Does the UI tell the truth? |
-| L4 Screen | Is the most important thing for this job first? |
-| L5 Element | Can it be tapped, read, understood? (`dom-audit.js`, axe-core, pixel contrast) |
-| L6 States | Empty, error, loading, long text, wrong input, other screen sizes? |
+| **ui-stress-test** | Top-down UI/UX audit. It walks each user job end to end, reads the code behind it, then breaks the screens: targets, contrast on rendered colours, overflow, names, headings, states. The report lists flow changes, then Fix and Improve items with P0–P3 severity, evidence and the standard each one breaks (Nielsen, WCAG 2.2 AA). Report only. |
+| **before-after-review** | Turns findings (a `ui-stress-test` report or any numbered list) into before → after visuals, one row per finding. Draws on a connected design canvas, or builds a self-contained HTML page. Each row gets an Apply / Later / Skip choice that is written back into the report. |
+| **pm-audit** | Product-manager audit of a running product. Gathers evidence from the repo, the live app, user chats, meetings, issues and competitors, then ranks what to fix. Every finding cites a source; fixes come before features. |
+| **whats-next** | Proposes what to build next from the repo and the market, backed by an evidence-based SWOT. |
+| **pre-flight** | Briefing before you build a feature or fix a bug: what changes, current state, assumptions, business-flow impact, expected outcome. Waits for your go before any code. |
+| **slop-audit** | Whole-repo audit for frontend and backend slop: copy-paste, dead code, `useEffect` misuse, fat handlers, N+1 queries, swallowed errors. Ranked report plus GitHub issues. |
+| **security-audit** | Attacker-minded audit of a repo and its production setup against OWASP Top 10 2025, API Top 10 and LLM Top 10. Assessment only. |
+| **production-readiness-audit** | SRE-style production readiness review: delivery and rollback, SLOs, scaling, data safety, observability. Graded scorecard and fix plan. |
 
-The output is a report (`.ui-stress/YYYY-MM-DD-<scope>.md`): flow changes with before → after step counts, then Fix and Improve items with layer, P0–P3 severity, evidence (`file:line`, screenshots, script output), the standard it breaks (Nielsen, WCAG 2.2 AA, forms, tables) and a concrete fix, plus a Nielsen problem score per role. It does not edit your code.
+How I chain them for UI work: `ui-stress-test` finds what is wrong → `before-after-review` draws the fixes → you pick Apply, Later or Skip for each one.
 
-Works on a live app (any browser automation: Playwright, Chrome DevTools, in-app preview), on a design file through a design-tool MCP, or on screenshots. Safe on live data: local or staging only, test records reverted, no outbound effects.
+## Preferences
+
+Skills from other authors, grouped by what I use them for. Each one keeps its author's license. Upstream links are in [`preferences/SOURCES.md`](preferences/SOURCES.md).
+
+| Use | Skills |
+|---|---|
+| Motion and animation | `animation-vocabulary`, `apple-design`, `emil-design-eng`, `find-animation-opportunities`, `improve-animations`, `review-animations` |
+| UI polish and mobile | `make-interfaces-feel-better`, `mobile-native`, `break-ui`, `frontend-design` |
+| Planning and issues | `grill-me`, `grill-with-docs`, `to-prd`, `to-issues`, `triage`, `handoff`, `setup-matt-pocock-skills` |
+| Writing skills and security | `effective-agent-skills`, `security-and-hardening` |
 
 ## Install
 
@@ -23,13 +41,15 @@ Works on a live app (any browser automation: Playwright, Chrome DevTools, in-app
 
 ```
 /plugin marketplace add asrafilll/ui-stress-test
-/plugin install ui-stress-test@ui-stress-test
+/plugin install asrafil-personal@ui-stress-test
+/plugin install asrafil-preferences@ui-stress-test
 ```
 
-**skills CLI (Claude Code, Codex and others)**
+**skills CLI** (Claude Code, Codex and others)
 
 ```sh
-npx skills add asrafilll/ui-stress-test
+npx skills add asrafilll/ui-stress-test                          # pick from the list
+npx skills add asrafilll/ui-stress-test --skill ui-stress-test   # one skill
 ```
 
 **By hand**
@@ -37,32 +57,35 @@ npx skills add asrafilll/ui-stress-test
 ```sh
 git clone https://github.com/asrafilll/ui-stress-test.git
 cd ui-stress-test
-./install.sh          # claude (default) | codex | both
+./install.sh --list
+./install.sh ui-stress-test before-after-review                  # into Claude Code
+./install.sh --target both personal                              # all personal skills, Claude Code and Codex
 ```
 
-## Use
-
-Ask in plain words: "stress test the UI of the checkout flow", "UX audit this screen", "what breaks here?", or call `/ui-stress-test`.
-
-Give it what you have: a URL (local or staging), the repo, a design file, or screenshots. It writes the job brief first and asks once for anything it can't infer.
-
-## What's inside
-
-```
-skills/ui-stress-test/
-  SKILL.md                     the method
-  references/                  standards, flow patterns, stress matrix, report template, default rules
-  scripts/dom-audit.js         targets, contrast on rendered colours, overflow, names, headings
-  scripts/axe.js               runs axe-core (loaded from a pinned CDN if the page has none)
-  scripts/pixel-contrast.mjs   contrast for text on gradients and images (Playwright)
-```
-
-Optional companions: a `break-ui` skill for worst-case data on one component, and a `before-after-review` skill to draw the fixes.
+`--target` is `claude` (default), `codex` or `both`. Override the folders with `CLAUDE_SKILLS_DIR` or `CODEX_SKILLS_DIR`. Restart your agent after installing.
 
 ## Credits
 
-The content-extremes method in `references/stress-matrix.md` is adapted from Emil Kowalski's `break-ui` skill (MIT).
+The skills in `preferences/` belong to their authors. Thank you:
+
+- [Emil Kowalski](https://github.com/emilkowalski/skills): the motion and animation skills, `break-ui` and `mobile-native`. `break-ui` also shaped the stress cases in `ui-stress-test`.
+- [Jakub Krehel](https://github.com/jakubkrehel/make-interfaces-feel-better): `make-interfaces-feel-better`.
+- [Anthropic](https://github.com/anthropics/skills): `frontend-design`.
+- [Matt Pocock](https://github.com/mattpocock/skills): `grill-me`, `grill-with-docs`, `to-prd`, `to-issues`, `triage`, `handoff`, `setup-matt-pocock-skills`.
+- [David Ondrej](https://github.com/davidondrej/skills): `effective-agent-skills`.
+- [Addy Osmani](https://github.com/addyosmani/agent-skills): `security-and-hardening`.
+
+I also use these, but they are not copied here. Install them from their authors:
+
+| Skill | Author | Why it is not copied |
+|---|---|---|
+| [impeccable](https://github.com/pbakaus/impeccable) | Paul Bakaus | Ships its own engine and updates often |
+| [design-taste-frontend](https://github.com/Leonxlnx/taste-skill) | Leonxlnx | Large (about 39 MB) |
+| [kami](https://github.com/tw93/kami) | tw93 | Large (bundled fonts) |
+| [apple-hig-review](https://github.com/dickwu/apple-design-skill) | dickwu | No license |
+| [bahasa-indonesia-plain](https://gist.github.com/orepras/3e1ca8974fc51d11825f142fa6a66635) | orepras | No license. Plain-language Bahasa Indonesia with the RASA check |
+| [english-plain](https://gist.github.com/orepras/61f07724a6d02d3f319e3371867dad6a) | orepras | No license. The English version |
 
 ## License
 
-MIT
+The skills in `personal/` are MIT, see [LICENSE](LICENSE). Each skill in `preferences/` keeps its author's license, listed in [`preferences/SOURCES.md`](preferences/SOURCES.md).

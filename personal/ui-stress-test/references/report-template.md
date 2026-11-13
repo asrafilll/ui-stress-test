@@ -12,6 +12,30 @@
 
 **Verdict:** one sentence. Can each role finish their jobs, and what is the single biggest gap?
 
+## Do first
+
+At most 5. Highest severity first; within a severity, smallest effort first.
+
+| # | Finding | Severity | Effort | Why first |
+|---|---|---|---|---|
+| 1 | [F1](#fix) <short title> | P0 | S | blocks Job 2 for every support agent |
+
+<!-- Re-audit only: keep this section, otherwise delete it. -->
+## Since the last audit (<previous report file>)
+
+| | Fixed | Still open | Changed | New | Not re-tested |
+|---|---|---|---|---|---|
+| Flow change | | | | | |
+| Fix | | | | | |
+| Improve | | | | | |
+
+| ID | Was | Now | Evidence |
+|---|---|---|---|
+| F1 | P0 | fixed | ![](2026-11-16/f1-fixed.png) |
+| F3 | P1 | still open | `file:line` |
+
+Problem score: Role A <before> → <after> /40.
+
 ## Job brief (L1)
 
 | Role | Situation (where, device, how often, stakes) | Top jobs | Best in class |
@@ -76,7 +100,7 @@ Patterns matched: …
 ### F1 · P0 · L6 State fix · <short title> · effort S/M/L
 - **Where:** screen / component / `file:line` / design node id
 - **What breaks:** the concrete input or state → what happens
-- **Evidence:** ![](absolute/path/to/screenshot.png) or script output (mark `(inferred)` if not reproduced)
+- **Evidence:** ![](YYYY-MM-DD/f1.png) (path relative to this file) or script output (mark `(inferred)` if not reproduced)
 - **Standard:** NN-9, WCAG 3.3.1, DR-1, PR:DESIGN.md …
 - **Fix:** the exact change
 
@@ -106,7 +130,12 @@ Patterns matched: …
 | uist-2026-11-09-… | | yes / **no, because …** |
 
 ## Open questions
+- **Confirm the brief:** every ⚠️ role, situation or job from the job brief, as a yes/no question.
 - …
 
 ## Appendix: minor items
 - …
+
+<!-- Added after a visual review, by the review skill. Leave it out until then. -->
+## Decisions
+- YYYY-MM-DD · Apply: FC1, F1 · Later: F3 · Skip: I2 (reason, if given)

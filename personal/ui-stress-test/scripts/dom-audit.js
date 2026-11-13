@@ -18,6 +18,9 @@
  *   landmarks: { main, nav, header, footer }
  * }
  *
+ * Each list holds about 60 items, worst first; the summary counts are never capped,
+ * so a count above the list length means the rest are milder cases of the same kind.
+ *
  * Thresholds: WCAG 2.2 AA. Target size 24px (2.5.8) and 44px advisory for touch.
  * Contrast 4.5:1 normal text, 3:1 large text (>= 24px, or >= 18.66px at weight >= 700).
  * Contrast is computed only when the background under the text is a stack of
@@ -160,9 +163,11 @@
       if (!spacingException) { level = 'fail-aa'; targetsFailAA++; }
     }
     if (level === 'below-touch') targetsBelowTouch++;
-    if (targets.length < MAX) targets.push({ sel: sel(el), text: txt(el, 40), w, h, level, spacingException });
+    targets.push({ sel: sel(el), text: txt(el, 40), w, h, level, spacingException });
   });
-  targets.sort((a, b) => (a.level === 'fail-aa' ? -1 : 1) - (b.level === 'fail-aa' ? -1 : 1));
+  // Worst first, then cap: a cap applied in DOM order drops the AA failures further down the page.
+  targets.sort((a, b) => (a.level === 'fail-aa' ? -1 : 1) - (b.level === 'fail-aa' ? -1 : 1) || a.w * a.h - b.w * b.h);
+  targets.length = Math.min(targets.length, MAX);
 
   // ---------- text: contrast, small text ----------
   const textEls = [];
@@ -207,7 +212,7 @@
     return { bg, method };
   };
 
-  const contrast = [], smallText = [];
+  const failItems = [], pixelItems = [], smallText = [];
   let contrastFail = 0, needsPixel = 0, smallCount = 0, fromAncestors = 0, uidN = 0;
   const tag = (el) => { const id = 'c' + (++uidN); el.setAttribute('data-uist', id); return id; };
   document.querySelectorAll('[data-uist]').forEach((e) => e.removeAttribute('data-uist')); // ids from an earlier run
@@ -222,7 +227,7 @@
     const fgRaw = rgba(s.color);
     if (b.reason) {
       needsPixel++;
-      if (contrast.length < MAX) contrast.push({ uid: tag(el), sel: sel(el), text: txt(el, 40), fg: hex(fgRaw), bg: null, ratio: null, required, large, status: 'needs-pixel-check', reason: b.reason, method: null });
+      if (pixelItems.length < MAX) pixelItems.push({ uid: tag(el), sel: sel(el), text: txt(el, 40), fg: hex(fgRaw), bg: null, ratio: null, required, large, status: 'needs-pixel-check', reason: b.reason, method: null });
       continue;
     }
     if (b.method === 'ancestors') fromAncestors++;
@@ -230,10 +235,13 @@
     const rt = Math.round(ratio(fg, b.bg) * 100) / 100;
     if (rt < required) {
       contrastFail++;
-      if (contrast.length < MAX) contrast.push({ uid: tag(el), sel: sel(el), text: txt(el, 40), fg: hex(fg), bg: hex(b.bg), ratio: rt, required, large, status: 'fail', reason: null, method: b.method });
+      failItems.push({ el, sel: sel(el), text: txt(el, 40), fg: hex(fg), bg: hex(b.bg), ratio: rt, required, large, status: 'fail', reason: null, method: b.method });
     }
   }
-  contrast.sort((a, b) => (a.status === 'fail' ? -1 : 1) - (b.status === 'fail' ? -1 : 1));
+  // Lowest ratio first, then cap; the pixel-check items take the slots that are left.
+  failItems.sort((a, b) => a.ratio / a.required - b.ratio / b.required);
+  const contrast = failItems.slice(0, MAX).map(({ el, ...item }) => ({ uid: tag(el), ...item }))
+    .concat(pixelItems.slice(0, Math.max(MAX - failItems.length, 20)));
 
   // ---------- overflow ----------
   // Text whose rendered lines reach past the element's own box by more than OVERFLOW_MIN.

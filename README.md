@@ -7,7 +7,7 @@ There are two folders:
 - [`personal/`](personal/): skills I wrote.
 - [`preferences/`](preferences/): skills by other people that I use every day. They are copied here with credit and their licenses. See [Credits](#credits).
 
-The repo started as the home of `ui-stress-test`, so it keeps that name.
+The repo started as the home of `ui-stress-test` (it used to be `asrafilll/ui-stress-test`; old links redirect here).
 
 ## Personal
 
@@ -31,7 +31,8 @@ Skills from other authors, grouped by what I use them for. Each one keeps its au
 | Use | Skills |
 |---|---|
 | Motion and animation | `animation-vocabulary`, `apple-design`, `emil-design-eng`, `find-animation-opportunities`, `improve-animations`, `review-animations` |
-| UI polish and mobile | `make-interfaces-feel-better`, `mobile-native`, `break-ui`, `frontend-design` |
+| UI design and polish | `impeccable`, `design-taste-frontend`, `frontend-design`, `make-interfaces-feel-better`, `mobile-native`, `break-ui` |
+| Plain writing | `bahasa-indonesia-plain`, `english-plain` |
 | Planning and issues | `grill-me`, `grill-with-docs`, `to-prd`, `to-issues`, `triage`, `handoff`, `setup-matt-pocock-skills` |
 | Writing skills and security | `effective-agent-skills`, `security-and-hardening` |
 
@@ -40,23 +41,23 @@ Skills from other authors, grouped by what I use them for. Each one keeps its au
 **Claude Code plugin**
 
 ```
-/plugin marketplace add asrafilll/ui-stress-test
-/plugin install asrafil-personal@ui-stress-test
-/plugin install asrafil-preferences@ui-stress-test
+/plugin marketplace add asrafilll/skills
+/plugin install asrafil-personal@asrafil-skills
+/plugin install asrafil-preferences@asrafil-skills
 ```
 
 **skills CLI** (Claude Code, Codex and others)
 
 ```sh
-npx skills add asrafilll/ui-stress-test                          # pick from the list
-npx skills add asrafilll/ui-stress-test --skill ui-stress-test   # one skill
+npx skills add asrafilll/skills                          # pick from the list
+npx skills add asrafilll/skills --skill ui-stress-test   # one skill
 ```
 
 **By hand**
 
 ```sh
-git clone https://github.com/asrafilll/ui-stress-test.git
-cd ui-stress-test
+git clone https://github.com/asrafilll/skills.git
+cd skills
 ./install.sh --list
 ./install.sh ui-stress-test before-after-review                  # into Claude Code
 ./install.sh --target both personal                              # all personal skills, Claude Code and Codex
@@ -71,6 +72,9 @@ The skills in `preferences/` belong to their authors. Thank you:
 - [Emil Kowalski](https://github.com/emilkowalski/skills): the motion and animation skills, `break-ui` and `mobile-native`. `break-ui` also shaped the stress cases in `ui-stress-test`.
 - [Jakub Krehel](https://github.com/jakubkrehel/make-interfaces-feel-better): `make-interfaces-feel-better`.
 - [Anthropic](https://github.com/anthropics/skills): `frontend-design`.
+- [Paul Bakaus](https://github.com/pbakaus/impeccable): `impeccable`.
+- [Leonxlnx](https://github.com/Leonxlnx/taste-skill): `design-taste-frontend`.
+- [orepras](https://gist.github.com/orepras): `bahasa-indonesia-plain` and the original `english-plain`. Both use orepras's RASA check (Ritmis, Akurat, Sarat makna, Alami).
 - [Matt Pocock](https://github.com/mattpocock/skills): `grill-me`, `grill-with-docs`, `to-prd`, `to-issues`, `triage`, `handoff`, `setup-matt-pocock-skills`.
 - [David Ondrej](https://github.com/davidondrej/skills): `effective-agent-skills`.
 - [Addy Osmani](https://github.com/addyosmani/agent-skills): `security-and-hardening`.
@@ -79,13 +83,9 @@ I also use these, but they are not copied here. Install them from their authors:
 
 | Skill | Author | Why it is not copied |
 |---|---|---|
-| [impeccable](https://github.com/pbakaus/impeccable) | Paul Bakaus | Ships its own engine and updates often |
-| [design-taste-frontend](https://github.com/Leonxlnx/taste-skill) | Leonxlnx | Large (about 39 MB) |
-| [kami](https://github.com/tw93/kami) | tw93 | Large (bundled fonts) |
+| [kami](https://github.com/tw93/kami) | tw93 | Large (bundled fonts, about 76 MB) |
 | [apple-hig-review](https://github.com/dickwu/apple-design-skill) | dickwu | No license |
-| [bahasa-indonesia-plain](https://gist.github.com/orepras/3e1ca8974fc51d11825f142fa6a66635) | orepras | No license. Plain-language Bahasa Indonesia with the RASA check |
-| [english-plain](https://gist.github.com/orepras/61f07724a6d02d3f319e3371867dad6a) | orepras | No license. The English version |
 
 ## License
 
-The skills in `personal/` are MIT, see [LICENSE](LICENSE). Each skill in `preferences/` keeps its author's license, listed in [`preferences/SOURCES.md`](preferences/SOURCES.md).
+The skills in `personal/` are MIT, see [LICENSE](LICENSE). Each skill in `preferences/` keeps its author's license, listed in [`preferences/SOURCES.md`](preferences/SOURCES.md). `bahasa-indonesia-plain` and `english-plain` come from orepras's public gists, which have no license; they are shared here with credit and will be taken down if the author asks.

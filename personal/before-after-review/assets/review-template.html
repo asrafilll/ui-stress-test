@@ -1,0 +1,242 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Before → after: SCOPE</title>
+<style>
+  :root {
+    --bg: #f6f7f9; --card: #fff; --ink: #14171c; --muted: #5b6370; --line: #e3e6eb;
+    --red: #d92d20; --green: #079455; --chip: #eef1f5;
+    --p0: #b42318; --p1: #c4320a; --p2: #b54708; --p3: #475467;
+    font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink); line-height: 1.45; }
+  .wrap { max-width: 1440px; margin: 0 auto; padding: 32px 24px 64px; }
+  header h1 { font-size: 24px; margin: 0 0 4px; }
+  .meta { color: var(--muted); font-size: 14px; }
+  .verdict { font-size: 17px; margin: 16px 0; max-width: 80ch; }
+  .brief { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px; margin: 16px 0; }
+  .brief div { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; font-size: 14px; }
+  .brief b { display: block; }
+  .stats { display: flex; gap: 12px; flex-wrap: wrap; margin: 16px 0; }
+  .stat { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 10px 16px; min-width: 120px; }
+  .stat strong { display: block; font-size: 26px; font-variant-numeric: tabular-nums; }
+  .stat span { color: var(--muted); font-size: 13px; }
+  .filters { display: flex; gap: 8px; flex-wrap: wrap; margin: 20px 0 8px; position: sticky; top: 0; background: var(--bg); padding: 8px 0; z-index: 2; }
+  .filters button { font: inherit; font-size: 13px; border: 1px solid var(--line); background: var(--card); border-radius: 999px; padding: 6px 12px; cursor: pointer; min-height: 32px; }
+  .filters button[aria-pressed="true"] { background: var(--ink); color: #fff; border-color: var(--ink); }
+
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 20px; margin: 16px 0; }
+  .card[hidden] { display: none; }
+  .head { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-bottom: 14px; }
+  .head h2 { font-size: 17px; margin: 0; flex: 1 1 320px; text-wrap: balance; }
+  .chip { font-size: 12px; font-weight: 600; background: var(--chip); border-radius: 999px; padding: 3px 9px; white-space: nowrap; }
+  .chip.P0 { background: #fee4e2; color: var(--p0); } .chip.P1 { background: #fef0c7; color: var(--p1); }
+  .chip.P2 { background: #fef6e0; color: var(--p2); } .chip.P3 { color: var(--p3); }
+  .row { display: grid; grid-template-columns: minmax(0, 1fr) 32px minmax(0, 1fr) minmax(220px, 300px); gap: 16px; align-items: start; }
+  .arrow { align-self: center; text-align: center; font-size: 22px; color: var(--muted); }
+  .pane > .label { font-size: 12px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; margin-bottom: 6px; }
+  .before .label { color: var(--red); } .after .label { color: var(--green); }
+  .shot { position: relative; border-radius: 10px; overflow: hidden; border: 1px solid var(--line); background: #fff; }
+  .shot img { display: block; width: 100%; height: auto; }
+  /* Callouts: position with inline left/top/width/height in % of the shot */
+  .mark { position: absolute; border: 3px solid var(--red); border-radius: 8px; }
+  .after .mark { border-color: var(--green); }
+  .mark::after { content: attr(data-n); position: absolute; top: -12px; left: -12px; width: 22px; height: 22px; border-radius: 50%;
+    background: var(--red); color: #fff; font: 700 12px/22px Inter, system-ui, sans-serif; text-align: center; }
+  .after .mark::after { background: var(--green); }
+  /* Callout text lives here, under the shot, keyed by number. Never write it over the screenshot. */
+  .legend { list-style: none; margin: 8px 0 0; padding: 0; font-size: 13px; }
+  .legend li { display: flex; gap: 8px; align-items: baseline; margin: 4px 0; }
+  .legend b { flex: 0 0 20px; height: 20px; border-radius: 50%; background: var(--red); color: #fff; font-size: 11px; line-height: 20px; text-align: center; }
+  .after .legend b { background: var(--green); }
+  /* AFTER mocks drawn in HTML: set the device width on .device */
+  .device { width: 100%; max-width: 390px; margin: 0 auto; border: 1px solid var(--line); border-radius: 18px; padding: 12px; background: #fff; }
+  .notes { font-size: 14px; }
+  .notes p { margin: 0 0 8px; }
+  .notes .k { color: var(--muted); font-size: 12px; text-transform: uppercase; letter-spacing: .04em; display: block; }
+  .steps { font-size: 28px; font-weight: 700; font-variant-numeric: tabular-nums; }
+  /* Flow-change strips */
+  .flow { display: grid; gap: 14px; }
+  .strip { display: flex; gap: 10px; align-items: center; overflow-x: auto; padding-bottom: 6px; }
+  .strip .count { flex: 0 0 120px; }
+  .strip .count b { display: block; font-size: 30px; font-variant-numeric: tabular-nums; }
+  .strip.real .count b { color: var(--red); } .strip.proposed .count b { color: var(--green); }
+  .step { flex: 0 0 220px; border: 1px solid var(--line); border-radius: 10px; padding: 8px; font-size: 12px; background: #fff; }
+  .step img { width: 100%; border-radius: 6px; display: block; margin-bottom: 6px; }
+  .step.friction { border-color: var(--red); box-shadow: inset 0 0 0 1px var(--red); }
+  .step .tag { color: var(--red); font-weight: 600; }
+  /* Decision per finding, and the bar that collects them */
+  .decide { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--line); font-size: 13px; }
+  .decide > span { color: var(--muted); margin-right: 4px; }
+  .decide label { border: 1px solid var(--line); border-radius: 999px; padding: 5px 12px; cursor: pointer; min-height: 32px; display: inline-flex; align-items: center; }
+  .decide input { position: absolute; opacity: 0; pointer-events: none; }
+  .decide label:has(input:checked) { background: var(--ink); color: #fff; border-color: var(--ink); }
+  .decide label:has(input:focus-visible) { outline: 2px solid var(--ink); outline-offset: 2px; }
+  .bar { position: sticky; bottom: 0; z-index: 2; display: flex; gap: 12px; align-items: center; flex-wrap: wrap; background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 10px 14px; margin-top: 24px; font-size: 14px; }
+  .bar output { flex: 1 1 240px; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+  .bar button { font: inherit; font-size: 13px; font-weight: 600; border: 0; border-radius: 8px; padding: 8px 14px; min-height: 36px; background: var(--ink); color: #fff; cursor: pointer; }
+  @media (max-width: 1000px) { .row { grid-template-columns: 1fr; } .arrow { transform: rotate(90deg); } }
+  @media print {
+    body { background: #fff; } .filters, .bar, .decide { display: none; }
+    .card { break-inside: avoid; border-color: #bbb; } .card[hidden] { display: block; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Before → after: SCOPE</h1>
+    <div class="meta">YYYY-MM-DD · source report: <code>.ui-stress/YYYY-MM-DD-scope.md</code> · input: ENV</div>
+    <p class="verdict"><strong>Verdict:</strong> VERDICT SENTENCE</p>
+    <div class="brief">
+      <div><b>ROLE</b>SITUATION · TOP JOBS</div>
+    </div>
+    <div class="stats">
+      <!-- These three are counted from the cards below; don't type them. -->
+      <div class="stat"><strong data-count="flow">0</strong><span>Flow changes</span></div>
+      <div class="stat"><strong data-count="fix">0</strong><span>Fix</span></div>
+      <div class="stat"><strong data-count="improve">0</strong><span>Improve</span></div>
+      <div class="stat"><strong>0/40</strong><span>Nielsen (ROLE)</span></div>
+    </div>
+  </header>
+
+  <nav class="filters" aria-label="Filter findings">
+    <button aria-pressed="true" data-f="all">All</button>
+    <button aria-pressed="false" data-f="flow">Flow changes</button>
+    <button aria-pressed="false" data-f="fix">Fix</button>
+    <button aria-pressed="false" data-f="improve">Improve</button>
+    <button aria-pressed="false" data-f="P0">P0</button>
+    <button aria-pressed="false" data-f="P1">P1</button>
+    <button aria-pressed="false" data-f="P2">P2</button>
+  </nav>
+
+  <!-- EXAMPLE: flow-change card. Duplicate per flow change; delete if unused. -->
+  <section class="card" id="FC1" data-kind="flow" data-sev="P1">
+    <div class="head">
+      <span class="chip">FC1</span><span class="chip P1">P1</span><span class="chip">L2</span>
+      <h2>TITLE OF THE FLOW CHANGE</h2>
+      <span class="chip">Pattern N: NAME</span><span class="chip">Effort M</span>
+    </div>
+    <div class="flow">
+      <div class="strip real">
+        <div class="count"><b>14</b>steps today</div>
+        <div class="step"><img src="before/step-1.png" alt="Step 1: SCREEN">1. SCREEN</div>
+        <div class="step friction"><img src="before/step-2.png" alt="Step 2: SCREEN">2. SCREEN <span class="tag">leaves the app</span></div>
+      </div>
+      <div class="strip proposed">
+        <div class="count"><b>2</b>steps proposed</div>
+        <div class="step"><img src="after/step-1.png" alt="Step 1: SCREEN">1. SCREEN</div>
+      </div>
+    </div>
+    <div class="notes" style="margin-top:12px">
+      <p><span class="k">Job</span>JOB OUTCOME · ROLE</p>
+      <p><span class="k">What has to change</span>UI · rule · data model · permission</p>
+      <p><span class="k">Code</span><code>path/to/file.ts:12</code> WHAT CHANGES THERE</p>
+      <p><span class="k">Standard</span>NN-5</p>
+    </div>
+    <!-- Same block on every card. name = decide-<ID>. -->
+    <div class="decide" role="radiogroup" aria-label="Decision for FC1">
+      <span>Decision</span>
+      <label><input type="radio" name="decide-FC1" value="apply">Apply</label>
+      <label><input type="radio" name="decide-FC1" value="later">Later</label>
+      <label><input type="radio" name="decide-FC1" value="skip">Skip</label>
+    </div>
+  </section>
+
+  <!-- EXAMPLE: fix / improve card. data-kind = fix | improve. -->
+  <section class="card" id="F1" data-kind="fix" data-sev="P0">
+    <div class="head">
+      <span class="chip">F1</span><span class="chip P0">P0</span><span class="chip">L6 State fix</span>
+      <h2>TITLE OF THE FINDING</h2>
+      <span class="chip">Effort S</span>
+    </div>
+    <div class="row">
+      <div class="pane before">
+        <div class="label">Before</div>
+        <div class="shot">
+          <img src="f1-before.png" alt="Before: SCREEN">
+          <div class="mark" data-n="1" style="left:10%;top:70%;width:80%;height:12%"></div>
+        </div>
+        <ol class="legend"><li><b>1</b>WHAT IS WRONG HERE</li></ol>
+      </div>
+      <div class="arrow" aria-hidden="true">→</div>
+      <div class="pane after">
+        <div class="label">After</div>
+        <!-- Either an image of the mock… -->
+        <div class="shot">
+          <img src="f1-after.png" alt="After: SCREEN">
+          <div class="mark" data-n="1" style="left:10%;top:70%;width:80%;height:12%"></div>
+        </div>
+        <!-- …or an HTML mock: <div class="device">…</div> -->
+        <ol class="legend"><li><b>1</b>WHAT IS DIFFERENT NOW</li></ol>
+      </div>
+      <div class="notes">
+        <p><span class="k">What breaks</span>INPUT OR STATE → WHAT HAPPENS</p>
+        <p><span class="k">Change</span>THE EXACT CHANGE</p>
+        <p><span class="k">Code</span><code>path/to/file.tsx:12</code></p>
+        <p><span class="k">Standard</span>WCAG 2.5.8 · NN-9</p>
+      </div>
+    </div>
+    <div class="decide" role="radiogroup" aria-label="Decision for F1">
+      <span>Decision</span>
+      <label><input type="radio" name="decide-F1" value="apply">Apply</label>
+      <label><input type="radio" name="decide-F1" value="later">Later</label>
+      <label><input type="radio" name="decide-F1" value="skip">Skip</label>
+    </div>
+  </section>
+
+  <!-- Keep this bar last. It collects the decisions into one line to paste back into the chat. -->
+  <div class="bar">
+    <output id="decisions" aria-live="polite">No decisions yet</output>
+    <button type="button" id="copy">Copy decisions</button>
+  </div>
+</div>
+
+<script>
+  // Filter chips: one active at a time.
+  const buttons = document.querySelectorAll('.filters button');
+  buttons.forEach((b) => b.addEventListener('click', () => {
+    buttons.forEach((x) => x.setAttribute('aria-pressed', String(x === b)));
+    const f = b.dataset.f;
+    document.querySelectorAll('.card').forEach((c) => {
+      c.hidden = !(f === 'all' || c.dataset.kind === f || c.dataset.sev === f);
+    });
+  }));
+
+  // Header counts come from the cards, so they can't drift from the content.
+  document.querySelectorAll('[data-count]').forEach((el) => {
+    el.textContent = document.querySelectorAll(`.card[data-kind="${el.dataset.count}"]`).length;
+  });
+
+  // Decisions: one line per page, e.g. "Apply: FC1, F1 · Later: F3 · Skip: I2".
+  const out = document.getElementById('decisions');
+  const KEY = 'before-after:' + document.title;
+  const line = () => ['apply', 'later', 'skip'].map((v) => {
+    const ids = [...document.querySelectorAll(`.decide input[value="${v}"]:checked`)].map((i) => i.name.replace('decide-', ''));
+    return ids.length ? `${v[0].toUpperCase()}${v.slice(1)}: ${ids.join(', ')}` : '';
+  }).filter(Boolean).join(' · ');
+  const refresh = () => {
+    out.textContent = line() || 'No decisions yet';
+    try { localStorage.setItem(KEY, JSON.stringify([...document.querySelectorAll('.decide input:checked')].map((i) => [i.name, i.value]))); } catch (e) { /* storage blocked: decisions last until reload */ }
+  };
+  try {
+    for (const [name, value] of JSON.parse(localStorage.getItem(KEY) || '[]')) {
+      const i = document.querySelector(`.decide input[name="${name}"][value="${value}"]`);
+      if (i) i.checked = true;
+    }
+  } catch (e) { /* nothing saved */ }
+  document.querySelectorAll('.decide input').forEach((i) => i.addEventListener('change', refresh));
+  refresh();
+  document.getElementById('copy').addEventListener('click', async (e) => {
+    const text = line();
+    if (!text) return;
+    try { await navigator.clipboard.writeText(text); e.target.textContent = 'Copied'; }
+    catch (err) { window.getSelection().selectAllChildren(out); e.target.textContent = 'Select and copy'; }
+    setTimeout(() => { e.target.textContent = 'Copy decisions'; }, 1500);
+  });
+</script>
+</body>
+</html>

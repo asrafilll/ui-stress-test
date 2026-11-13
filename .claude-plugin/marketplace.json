@@ -1,14 +1,21 @@
 {
-  "name": "ui-stress-test",
-  "description": "The ui-stress-test agent skill: a top-down UI/UX audit with flow changes, Fix and Improve findings, and evidence.",
-  "owner": {
-    "name": "Asrafil"
-  },
+  "name": "asrafil-skills",
+  "description": "Asrafil's agent skills: the ones I wrote (personal) and the ones from other authors I use every day (preferences).",
+  "owner": { "name": "Asrafil" },
   "plugins": [
     {
-      "name": "ui-stress-test",
+      "name": "asrafil-personal",
       "source": "./",
-      "description": "Top-down UI/UX audit: walks each user job end to end, reads the code behind it, then breaks the screens. Report only."
+      "strict": false,
+      "description": "Skills I wrote: ui-stress-test, before-after-review, pm-audit, whats-next, pre-flight, slop-audit, security-audit, production-readiness-audit.",
+      "skills": ["./personal/"]
+    },
+    {
+      "name": "asrafil-preferences",
+      "source": "./",
+      "strict": false,
+      "description": "Skills by other authors that I use (MIT or Apache 2.0, credited in preferences/SOURCES.md).",
+      "skills": ["./preferences/"]
     }
   ]
 }

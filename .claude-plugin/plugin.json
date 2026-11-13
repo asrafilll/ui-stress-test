@@ -1,8 +1,0 @@
-{
-  "name": "ui-stress-test",
-  "description": "Stress-test a UI and report what to Fix and what to Improve, including flow changes, judged against Nielsen, WCAG 2.2 AA and best-in-class tools.",
-  "version": "1.0.0",
-  "author": { "name": "Asrafil" },
-  "license": "MIT",
-  "keywords": ["ux", "ui", "audit", "accessibility", "wcag", "nielsen"]
-}
